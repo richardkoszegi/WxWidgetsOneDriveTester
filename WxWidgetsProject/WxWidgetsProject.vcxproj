@@ -71,8 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(WXWIN)include;$(WXWIN)include\msvc;$(IncludePath)</IncludePath>
-    <LibraryPath>$(WXWIN)lib\vc_lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)include;$(WXWIN)include;$(WXWIN)include\msvc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)bin;$(WXWIN)lib\vc_lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -94,6 +94,8 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)bin</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libcurl_debug.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -144,7 +146,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="cURL_Thread.cpp" />
+    <ClCompile Include="MyCurl.cpp" />
+    <ClCompile Include="OAuthProvider.cpp" />
+    <ClCompile Include="OneDriveHandler.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="WebLogin.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cURL_Thread.h" />
+    <ClInclude Include="MyCurl.h" />
+    <ClInclude Include="OAuthProvider.h" />
+    <ClInclude Include="OneDriveHandler.h" />
+    <ClInclude Include="WebLogin.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
