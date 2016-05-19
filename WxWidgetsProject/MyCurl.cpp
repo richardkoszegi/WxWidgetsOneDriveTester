@@ -86,33 +86,42 @@ char* MyCurl::GetResponse() {
 	return const_cast<char *>(response.c_str());
 }
 
-size_t static reader(char *bufptr, size_t size, size_t nitems, void *userp) {
-	if (userp == NULL) {
+size_t static datawriter(char *bufptr, size_t size, size_t nitems, void *userp) {
+	/*if (userp == NULL) {
 		return 0;
-	}
-	FILE *fileptr = (FILE*)userp;
+	}*/
+	/*FILE *fileptr = fopen("Hello2.txt", "rb");
 	fread(bufptr, size, nitems, fileptr);
-	return size * nitems;
+	wxLogDebug(bufptr);*/
+
+	FILE* f = fopen("Hello2.txt", "rb");
+	wxFileName finfo("Hello2.txt");
+	auto stringlength = static_cast<size_t>(finfo.GetSize().GetValue());
+	//char* bufptr = new char[stringlength];
+	fseek(f, 0, SEEK_SET);
+	fread(bufptr, sizeof(char), stringlength, f);
+	wxLogDebug(wxString(bufptr));
+	fclose(f);
+
+	//return size * nitems;
+	return stringlength;
 }
 
 void MyCurl::SetToSmallFile() {
-	FILE* file;
-	file = fopen("Hello2.txt", "rb");
 	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
 
-	curl_easy_setopt(curl, CURLOPT_POST, 1L);
-	//	curl_easy_setopt(eh, CURLOPT_POSTFIELDSIZE_LARGE, post_size);
-	curl_easy_setopt(curl, CURLOPT_READDATA, this);
-	curl_easy_setopt(curl, CURLOPT_READFUNCTION, reader);
-	wxString str("Hello2.txt");
-	wxFileName finfo(str);
-	wxLogDebug(finfo.GetSize().ToString());
-	wxString anyad("Content-Length: ");
-	anyad += finfo.GetSize().ToString();
-	char * bazdmeg = const_cast<char *>(anyad.mbc_str().data());
-	wxLogDebug(anyad);
-	AddHeader(bazdmeg);
-	//curl_easy_setopt(eh, CURLOPT_INFILESIZE_LARGE, post_size);
+	FILE* f = fopen("Hello2.txt", "rb");
+	wxFileName finfo("Hello2.txt");
+	auto stringlength = static_cast<size_t>(finfo.GetSize().GetValue());
+	byte* data = new byte[stringlength];
+	fseek(f, 0, SEEK_SET);
+	fread(data, sizeof(byte), stringlength, f);
+	wxLogDebug(wxString(data));
+	fclose(f);
+
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+
+	delete[] data;
 }
 
 

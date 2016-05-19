@@ -10,6 +10,8 @@
 #include "MyCurl.h"
 #include <iostream>
 
+#include <wx/filename.h>
+
 using namespace rapidjson;
 //using namespace Provider;
 OneDriveHandler::OneDriveHandler()
@@ -143,6 +145,9 @@ void OneDriveHandler::UploadHelloFile() {
 }
 
 void OneDriveHandler::UploadSmallFile() {
+	if (rootDirId == "")
+		GetRootDirId();
+
 	MyCurl curl;
 	wxString authHeader = wxString("Authorization: bearer ") + this->GetAccessToken();
 	curl.AddHeader(const_cast<char *>(authHeader.mb_str().data()));
@@ -157,6 +162,8 @@ void OneDriveHandler::UploadSmallFile() {
 	curl.DoIt();
 	wxMessageBox(curl.GetResponse(),
 		"File Uploaded", wxOK | wxICON_INFORMATION);
+
+	
 }
 
 void OneDriveHandler::GetRootDirId() {
