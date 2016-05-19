@@ -28,5 +28,7 @@ private:
 	wxString rootDirId;
 
 	void GetRootDirId();
+
+	wxString uploadFileName;
 };
 

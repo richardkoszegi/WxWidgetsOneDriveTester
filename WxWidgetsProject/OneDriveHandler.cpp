@@ -16,6 +16,7 @@ using namespace rapidjson;
 //using namespace Provider;
 OneDriveHandler::OneDriveHandler()
 {
+	uploadFileName = "kozelebb.pdf";
 }
 
 
@@ -59,8 +60,8 @@ client_id=000000004818EA82\
 
 	GetRootDirId();
 
-	wxMessageBox("code=" + auth_code +"\nToken ="+this->GetAccessToken(),
-		"Da token", wxOK | wxICON_INFORMATION);
+	wxMessageBox("Sikerült bejelentkeznie a OneDrive-ra!",
+		"Sikerült!", wxOK | wxICON_INFORMATION);
 	return true;
 }
 
@@ -152,18 +153,18 @@ void OneDriveHandler::UploadSmallFile() {
 	wxString authHeader = wxString("Authorization: bearer ") + this->GetAccessToken();
 	curl.AddHeader(const_cast<char *>(authHeader.mb_str().data()));
 	curl.AddHeader("Content-Type: text/plain");
-	curl.SetToSmallFile();
+	curl.SetToSmallFile(uploadFileName);
 	wxLogDebug(rootDirId);
-	wxString url = wxString("https://api.onedrive.com/v1.0/drive/items/") + rootDirId + wxString("/children/Hello2.txt/content");
-	wxLogDebug(url);
-	curl.SetUrl(const_cast<char *>(url.mb_str().data()));
+	wxString url = wxString("https://api.onedrive.com/v1.0/drive/items/") + rootDirId + wxString("/children/") + uploadFileName + wxString("/content");
+	//wxString url = wxString("https://api.onedrive.com/v1.0/drive/items/") + rootDirId + wxString("/children/kozelebb.pdf/content");
 
+	wxLogDebug(url);
+	//curl.SetUrl(const_cast<char *>(url.mb_str().data()));
+	curl.SetUrl(const_cast<char *>(url.c_str().AsChar()));
 
 	curl.DoIt();
 	wxMessageBox(curl.GetResponse(),
 		"File Uploaded", wxOK | wxICON_INFORMATION);
-
-	
 }
 
 void OneDriveHandler::GetRootDirId() {

@@ -1,0 +1,1 @@
+Mûködik ez wxWidgets toolokkal is :P

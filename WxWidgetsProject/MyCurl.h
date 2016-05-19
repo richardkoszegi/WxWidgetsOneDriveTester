@@ -2,6 +2,8 @@
 
 #include "curl/curl.h"
 #include <string>
+#include <wx/wx.h>
+#include <wx/filename.h>
 
 
 enum RequestType {
@@ -19,6 +21,7 @@ private:
 	RequestType requestType;
 	char* requestUrl;
 	std::string response;
+	char* uploadData;
 public:
 	MyCurl();
 	~MyCurl();
@@ -35,6 +38,6 @@ public:
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "Hello From OneDriveTest"); /* data goes here */
 	}
 
-	void SetToSmallFile();
+	void SetToSmallFile(wxString fileName);
 };
 

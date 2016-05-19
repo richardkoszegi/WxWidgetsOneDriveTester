@@ -1,6 +1,5 @@
 #include "MyCurl.h"
-#include <wx/wx.h>
-#include <wx/filename.h>
+
 
 
 MyCurl::MyCurl()
@@ -10,12 +9,19 @@ MyCurl::MyCurl()
 		throw "Cannot initialize curl";
 	headerChunk = NULL;
 	requestType = HTTP_GET;
+
+	uploadData = NULL;
 }
 
 
 MyCurl::~MyCurl()
 {
+	if(headerChunk != NULL)
+		curl_slist_free_all(headerChunk);
 	curl_easy_cleanup(curl);
+
+	if (uploadData != NULL)
+		delete[] uploadData;
 }
 
 void MyCurl::AddHeader(char* header) {
@@ -86,42 +92,28 @@ char* MyCurl::GetResponse() {
 	return const_cast<char *>(response.c_str());
 }
 
-size_t static datawriter(char *bufptr, size_t size, size_t nitems, void *userp) {
-	/*if (userp == NULL) {
-		return 0;
-	}*/
-	/*FILE *fileptr = fopen("Hello2.txt", "rb");
-	fread(bufptr, size, nitems, fileptr);
-	wxLogDebug(bufptr);*/
-
-	FILE* f = fopen("Hello2.txt", "rb");
-	wxFileName finfo("Hello2.txt");
-	auto stringlength = static_cast<size_t>(finfo.GetSize().GetValue());
-	//char* bufptr = new char[stringlength];
-	fseek(f, 0, SEEK_SET);
-	fread(bufptr, sizeof(char), stringlength, f);
-	wxLogDebug(wxString(bufptr));
-	fclose(f);
-
-	//return size * nitems;
-	return stringlength;
-}
-
-void MyCurl::SetToSmallFile() {
+void MyCurl::SetToSmallFile(wxString fileName) {
 	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
 
-	FILE* f = fopen("Hello2.txt", "rb");
-	wxFileName finfo("Hello2.txt");
+	/*FILE* f = fopen("Hello2.txt", "rb");
+	wxFileName finfo("Hello2.txt");*/
+	/*FILE* f = fopen("kozelebb.pdf", "rb");
+	wxFileName finfo("kozelebb.pdf");
 	auto stringlength = static_cast<size_t>(finfo.GetSize().GetValue());
+	wxLogDebug(wxString(static_cast<char>(stringlength)));
 	byte* data = new byte[stringlength];
 	fseek(f, 0, SEEK_SET);
 	fread(data, sizeof(byte), stringlength, f);
-	wxLogDebug(wxString(data));
-	fclose(f);
+	fclose(f);*/
 
-	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, data);
+	wxFileName finfo(fileName);
+	wxFile file(fileName, wxFile::read);
+	uploadData = new char[file.Length()];
+	auto uploadDataSize = file.Read(uploadData, file.Length());
 
-	delete[] data;
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, uploadData);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, uploadDataSize);
+	//delete[] data;
 }
 
 
