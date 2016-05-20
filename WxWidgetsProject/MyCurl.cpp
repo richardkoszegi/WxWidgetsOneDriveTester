@@ -40,7 +40,10 @@ void MyCurl::SetRequestType(RequestType type) {
 	case HTTP_POST:
 		code = curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
 		break;
-	//TODO: PUT, DELETE
+	case HTTP_PUT:
+		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+		break;
+	//TODO: DELETE
 	}
 	if (code != CURLE_OK)
 		throw "Failed to set HTTPGet";
@@ -92,28 +95,28 @@ char* MyCurl::GetResponse() {
 	return const_cast<char *>(response.c_str());
 }
 
-void MyCurl::SetToSmallFile(wxString fileName) {
+static int progressCallback(void *clientptr, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
+	wxProgressDialog* progressDialog = (wxProgressDialog *)clientptr;
+	progressDialog->Update(ulnow);
+	return 0;
+}
+
+void MyCurl::setXferFunction(wxProgressDialog* progressDialog) {
+	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
+	curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progressCallback);
+	curl_easy_setopt(curl, CURLOPT_XFERINFODATA, progressDialog);
+}
+
+void MyCurl::SetToSmallFile(wxString fileName, wxString filePath) {
 	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
 
-	/*FILE* f = fopen("Hello2.txt", "rb");
-	wxFileName finfo("Hello2.txt");*/
-	/*FILE* f = fopen("kozelebb.pdf", "rb");
-	wxFileName finfo("kozelebb.pdf");
-	auto stringlength = static_cast<size_t>(finfo.GetSize().GetValue());
-	wxLogDebug(wxString(static_cast<char>(stringlength)));
-	byte* data = new byte[stringlength];
-	fseek(f, 0, SEEK_SET);
-	fread(data, sizeof(byte), stringlength, f);
-	fclose(f);*/
-
-	wxFileName finfo(fileName);
-	wxFile file(fileName, wxFile::read);
-	uploadData = new char[file.Length()];
-	auto uploadDataSize = file.Read(uploadData, file.Length());
+	wxFileName finfo(filePath);
+	wxFile file(filePath, wxFile::read);
+	uploadData = new char[finfo.GetSize().GetValue()];
+	auto uploadDataSize = file.Read(uploadData, finfo.GetSize().GetValue());
 
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, uploadData);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, uploadDataSize);
-	//delete[] data;
 }
 
 

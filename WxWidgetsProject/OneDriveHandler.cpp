@@ -16,7 +16,8 @@ using namespace rapidjson;
 //using namespace Provider;
 OneDriveHandler::OneDriveHandler()
 {
-	uploadFileName = "kozelebb.pdf";
+	uploadFileName = "";
+	uploadFilePath = "C:\\Users\\Richárd\\Desktop\\sample with space.txt";
 }
 
 
@@ -149,20 +150,32 @@ void OneDriveHandler::UploadSmallFile() {
 	if (rootDirId == "")
 		GetRootDirId();
 
+	if (uploadFileName == "" && uploadFilePath != "") {
+		uploadFileName = uploadFilePath.SubString(uploadFilePath.find_last_of("\\") + 1,uploadFilePath.size());
+		if (uploadFileName.Contains(" ")) {
+			uploadFileName.Replace(" ", "%20", true);
+		}
+	}
+
 	MyCurl curl;
 	wxString authHeader = wxString("Authorization: bearer ") + this->GetAccessToken();
 	curl.AddHeader(const_cast<char *>(authHeader.mb_str().data()));
 	curl.AddHeader("Content-Type: text/plain");
-	curl.SetToSmallFile(uploadFileName);
+	curl.SetToSmallFile(uploadFileName, uploadFilePath);
+	auto uploadFileInfo = wxFileName(uploadFileName);
+	wxProgressDialog* progressDialog = new wxProgressDialog("Upload progress", "Your upload in progress:", uploadFileInfo.GetSize().GetValue());
+	progressDialog->ShowModal();
+	//curl.setXferFunction(progressDialog);
 	wxLogDebug(rootDirId);
 	wxString url = wxString("https://api.onedrive.com/v1.0/drive/items/") + rootDirId + wxString("/children/") + uploadFileName + wxString("/content");
 	//wxString url = wxString("https://api.onedrive.com/v1.0/drive/items/") + rootDirId + wxString("/children/kozelebb.pdf/content");
 
-	wxLogDebug(url);
+	//wxLogDebug(url);
 	//curl.SetUrl(const_cast<char *>(url.mb_str().data()));
 	curl.SetUrl(const_cast<char *>(url.c_str().AsChar()));
 
 	curl.DoIt();
+	delete progressDialog;
 	wxMessageBox(curl.GetResponse(),
 		"File Uploaded", wxOK | wxICON_INFORMATION);
 }

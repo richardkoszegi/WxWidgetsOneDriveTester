@@ -30,5 +30,6 @@ private:
 	void GetRootDirId();
 
 	wxString uploadFileName;
+	wxString uploadFilePath;
 };
 

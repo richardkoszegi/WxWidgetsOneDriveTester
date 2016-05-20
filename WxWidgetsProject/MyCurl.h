@@ -4,6 +4,7 @@
 #include <string>
 #include <wx/wx.h>
 #include <wx/filename.h>
+#include <wx/progdlg.h>
 
 
 enum RequestType {
@@ -31,6 +32,7 @@ public:
 	void SetRequestType(RequestType);
 	void SetUrl(char* url);
 	char* GetResponse();
+	void setXferFunction(wxProgressDialog* progressDialog);
 
 	void SetToHello() {
 		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
@@ -38,6 +40,6 @@ public:
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "Hello From OneDriveTest"); /* data goes here */
 	}
 
-	void SetToSmallFile(wxString fileName);
+	void SetToSmallFile(wxString fileName, wxString filePath);
 };
 
