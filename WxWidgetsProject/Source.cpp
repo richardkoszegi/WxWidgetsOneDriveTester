@@ -24,6 +24,7 @@ private:
 	void OnLogin(wxCommandEvent& event);
 	void UploadHello(wxCommandEvent& event);
 	void UploadSmallFile(wxCommandEvent& event);
+	void CreateFolder(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 };
 
@@ -31,7 +32,8 @@ private:
 enum {
 	ID_Login = 1,
 	ID_UploadHello = 2,
-	ID_UploadSmallFile = 3
+	ID_UploadSmallFile = 3,
+	ID_CreateFolder = 4
 };
 
 
@@ -41,6 +43,7 @@ EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
 EVT_MENU(ID_Login, MyFrame::OnLogin)
 EVT_MENU(ID_UploadHello, MyFrame::UploadHello)
 EVT_MENU(ID_UploadSmallFile, MyFrame::UploadSmallFile)
+EVT_MENU(ID_CreateFolder, MyFrame::CreateFolder)
 wxEND_EVENT_TABLE()
 wxIMPLEMENT_APP(MyApp);
 bool MyApp::OnInit()
@@ -59,6 +62,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuODLogin->Append(ID_Login, "&OneDriveLogin", "Login to OneDrive");
 	menuODLogin->Append(ID_UploadHello, "&UploadHello", "Upload Hello file");
 	menuODLogin->Append(ID_UploadSmallFile, "&UploadSmallFile", "Upload Small File");
+	menuODLogin->Append(ID_CreateFolder, "&CreateFolder", "Create Folder");
 
 	wxMenu *menuHelp = new wxMenu;
 	menuHelp->Append(wxID_ABOUT);
@@ -97,7 +101,13 @@ void MyFrame::UploadHello(wxCommandEvent& event) {
 }
 
 void MyFrame::UploadSmallFile(wxCommandEvent& event) {
-	this->SetStatusText("Log in done!");
+	this->SetStatusText("File uploading...");
 	odh->UploadSmallFile();
 	this->SetStatusText("File uploaded!");
+}
+
+void MyFrame::CreateFolder(wxCommandEvent&event) {
+	this->SetStatusText("Folder uploading...");
+	odh->CreateDirectory();
+	this->SetStatusText("Folder uploaded!");
 }

@@ -41,7 +41,7 @@ void MyCurl::SetRequestType(RequestType type) {
 		code = curl_easy_setopt(curl, CURLOPT_HTTPPOST, 1L);
 		break;
 	case HTTP_PUT:
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
+		code = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 		break;
 	//TODO: DELETE
 	}
@@ -117,6 +117,13 @@ void MyCurl::SetToSmallFile(wxString fileName, wxString filePath) {
 
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, uploadData);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, uploadDataSize);
+}
+
+void MyCurl::SetData(wxString data) {
+	uploadData = new char[data.Length()];
+	memcpy(uploadData,data.c_str(),data.Len());
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, uploadData);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.Len());
 }
 
 

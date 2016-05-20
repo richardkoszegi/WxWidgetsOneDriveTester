@@ -24,6 +24,8 @@ public:
 	void UploadHelloFile();
 
 	void UploadSmallFile();
+
+	void CreateDirectory();
 private:
 	wxString rootDirId;
 
@@ -31,5 +33,8 @@ private:
 
 	wxString uploadFileName;
 	wxString uploadFilePath;
+
+	//Test Upload Directory
+	wxString uploadDirectoryName;
 };
 

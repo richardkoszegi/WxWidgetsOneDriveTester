@@ -23,6 +23,7 @@ private:
 	char* requestUrl;
 	std::string response;
 	char* uploadData;
+
 public:
 	MyCurl();
 	~MyCurl();
@@ -41,5 +42,7 @@ public:
 	}
 
 	void SetToSmallFile(wxString fileName, wxString filePath);
+
+	void SetData(wxString data);
 };
 
