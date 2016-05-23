@@ -86,6 +86,8 @@ void MyCurl::DoIt() {
 
 	code = curl_easy_perform(curl);
 
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &responseCode);
+
 	if (code != CURLE_OK)
 		fprintf(stderr, "curl_easy_perform() failed: %s\n",
 			curl_easy_strerror(code));
@@ -107,8 +109,8 @@ void MyCurl::setXferFunction(wxProgressDialog* progressDialog) {
 	curl_easy_setopt(curl, CURLOPT_XFERINFODATA, progressDialog);
 }
 
-void MyCurl::SetToSmallFile(wxString fileName, wxString filePath) {
-	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
+void MyCurl::SetToSmallFile(wxString filePath) {
+	//curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
 
 	wxFileName finfo(filePath);
 	wxFile file(filePath, wxFile::read);

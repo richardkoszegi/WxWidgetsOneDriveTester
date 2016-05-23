@@ -150,6 +150,7 @@
     <ClCompile Include="MyCurl.cpp" />
     <ClCompile Include="OAuthProvider.cpp" />
     <ClCompile Include="OneDriveHandler.cpp" />
+    <ClCompile Include="OneDriveUploader.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="WebLogin.cpp" />
   </ItemGroup>
@@ -158,6 +159,7 @@
     <ClInclude Include="MyCurl.h" />
     <ClInclude Include="OAuthProvider.h" />
     <ClInclude Include="OneDriveHandler.h" />
+    <ClInclude Include="OneDriveUploader.h" />
     <ClInclude Include="WebLogin.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

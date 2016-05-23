@@ -16,13 +16,15 @@
 
 #include <wx/filename.h>
 
+//UploadLargeFile
+#include "OneDriveUploader.h"
+
 using namespace rapidjson;
 //using namespace Provider;
 OneDriveHandler::OneDriveHandler()
 {
-	uploadFileName = "";
-	uploadFilePath = "C:\\Users\\Richárd\\Desktop\\sample with space.txt";
 	uploadDirectoryName = "HelloDirectory";
+	uploadToPath = false;
 }
 
 
@@ -64,7 +66,7 @@ client_id=000000004818EA82\
 	// Revoke authorization rights here:
 	// (will search for it later)
 
-	GetRootDirId();
+	//GetRootDirId();
 
 	wxMessageBox("Sikerült bejelentkeznie a OneDrive-ra!",
 		"Sikerült!", wxOK | wxICON_INFORMATION);
@@ -127,60 +129,54 @@ size_t OneDriveHandler::OneDrive_HelloFile_Callback(char *d, size_t n, size_t l,
 	return n*l;
 }
 
-
-void OneDriveHandler::UploadHelloFile() {
-	if (rootDirId == "")
-		GetRootDirId();
-	/*auto req = new Network::Request("https://api.onedrive.com/v1.0/drive/special/approot", OneDrive_HelloFile_Callback,0);
-	req->AddHeader("Authorization: bearer " + this->GetAccessToken());
-	Network::cURL_Thread::Get().AddRequest(req);*/
-
+void OneDriveHandler::UploadSmallFile(wxString filePath) {
 	MyCurl curl;
 	wxString authHeader = wxString("Authorization: bearer ") + this->GetAccessToken();
 	curl.AddHeader(const_cast<char *>(authHeader.mb_str().data()));
 	curl.AddHeader("Content-Type: text/plain");
-	curl.SetToHello();
-	wxLogDebug(rootDirId);
-	wxString url = wxString("https://api.onedrive.com/v1.0/drive/items/") + rootDirId + wxString("/children/Hello.txt/content");
-	wxLogDebug(url);
-	curl.SetUrl(const_cast<char *>(url.mb_str().data()));
 
-	curl.DoIt();
-	wxMessageBox(curl.GetResponse(),
-		"File Uploaded", wxOK | wxICON_INFORMATION);
-	
-}
-
-void OneDriveHandler::UploadSmallFile() {
-	if (rootDirId == "")
-		GetRootDirId();
-
-	if (uploadFileName == "" && uploadFilePath != "") {
-		uploadFileName = uploadFilePath.SubString(uploadFilePath.find_last_of("\\") + 1,uploadFilePath.size());
+	wxString url;
+	if (uploadToPath) {
+		wxString modifiedFilePath = filePath.SubString(filePath.First("\\"), filePath.size());
+		if (modifiedFilePath.Contains(" ")) {
+			modifiedFilePath.Replace(" ", "%20", true);
+		}
+		modifiedFilePath.Replace("\\", "/", true);
+		url = wxString("https://api.onedrive.com/v1.0/drive/special/approot:") + modifiedFilePath + wxString(":/content");
+	}
+	else {
+		wxString uploadFileName = filePath.SubString(filePath.find_last_of("\\") + 1, filePath.size());
 		if (uploadFileName.Contains(" ")) {
 			uploadFileName.Replace(" ", "%20", true);
 		}
+		url = wxString("https://api.onedrive.com/v1.0/drive/special/approot:/") + uploadFileName + wxString(":/content");
 	}
 
-	MyCurl curl;
-	wxString authHeader = wxString("Authorization: bearer ") + this->GetAccessToken();
-	curl.AddHeader(const_cast<char *>(authHeader.mb_str().data()));
-	curl.AddHeader("Content-Type: text/plain");
-
-	curl.SetToSmallFile(uploadFileName, uploadFilePath);
-	//auto uploadFileInfo = wxFileName(uploadFileName);
-
-	//wxProgressDialog* progressDialog = new wxProgressDialog("Upload progress", "Your upload in progress:", uploadFileInfo.GetSize().GetValue());
-	//progressDialog->ShowModal();
-	//curl.setXferFunction(progressDialog);
-
-	wxString url = wxString("https://api.onedrive.com/v1.0/drive/items/") + rootDirId + wxString("/children/") + uploadFileName + wxString("/content");
 	curl.SetUrl(const_cast<char *>(url.c_str().AsChar()));
 
+	curl.SetRequestType(HTTP_PUT);
+	curl.SetToSmallFile(filePath);
+	auto uploadFileInfo = wxFileName(filePath);
+
+	wxProgressDialog* progressDialog = new wxProgressDialog("Upload progress", "Your upload in progress:", uploadFileInfo.GetSize().GetValue());
+	progressDialog->ShowModal();
+	curl.setXferFunction(progressDialog);
+
 	curl.DoIt();
-	//delete progressDialog;
-	wxMessageBox(curl.GetResponse(),
-		"File Uploaded", wxOK | wxICON_INFORMATION);
+	delete progressDialog;
+
+	if (curl.GetResponseCode() == 201 || curl.GetResponseCode() == 200) {
+		Document d;
+		d.ParseInsitu(curl.GetResponse());
+		Value& nameValue = d["name"];
+		wxString message = nameValue.GetString() + wxString(" file uploaded successfully!");
+		wxMessageBox(message, "File Uploaded!", wxOK | wxICON_INFORMATION);
+	}
+	else {
+		std::string message = "Error code: ";
+		message+= std::to_string( curl.GetResponseCode());
+		wxMessageBox(message, "Error!", wxOK | wxICON_ERROR);
+	}
 }
 
 void OneDriveHandler::GetRootDirId() {
@@ -206,7 +202,6 @@ void OneDriveHandler::GetRootDirId() {
 
 		wxLogDebug(rootDirId);
 	}
-	//catch (rapidjson_exception& e) { printf("rapidjson exception\n"); }
 	catch (...) { printf("other exception\n"); }
 }
 
@@ -250,5 +245,27 @@ void OneDriveHandler::CreateDirectory() {
 	delete progressDialog;
 	wxMessageBox(curl.GetResponse(),
 		"File Uploaded", wxOK | wxICON_INFORMATION);
+}
+
+bool OneDriveHandler::IsLoggedIn() {
+	if (this->GetAccessToken() == "")
+		return false;
+	else
+		return true;
+}
+
+
+void OneDriveHandler::UploadLargeFile(wxString filePath) {
+	OneDriveUploader uploader(filePath, this);
+	uploader.CreateUploadSession();
+	uploader.UploadFragments();
+}
+
+void OneDriveHandler::UploadFile(wxString filePath) {
+	auto uploadFileInfo = wxFileName(filePath);
+	if (uploadFileInfo.GetSize().GetValue() > (10 * 1024 * 1024))
+		UploadLargeFile(filePath);
+	else
+		UploadSmallFile(filePath);
 }
 

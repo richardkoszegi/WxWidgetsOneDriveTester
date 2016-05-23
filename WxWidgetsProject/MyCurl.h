@@ -23,7 +23,7 @@ private:
 	char* requestUrl;
 	std::string response;
 	char* uploadData;
-
+	int responseCode;
 public:
 	MyCurl();
 	~MyCurl();
@@ -35,14 +35,12 @@ public:
 	char* GetResponse();
 	void setXferFunction(wxProgressDialog* progressDialog);
 
-	void SetToHello() {
-		curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT"); /* !!! */
-
-		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "Hello From OneDriveTest"); /* data goes here */
-	}
-
-	void SetToSmallFile(wxString fileName, wxString filePath);
+	void SetToSmallFile(wxString filePath);
 
 	void SetData(wxString data);
+
+	int GetResponseCode() {
+		return responseCode;
+	}
 };
 
