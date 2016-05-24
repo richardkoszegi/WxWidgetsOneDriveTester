@@ -5,6 +5,8 @@
 #include <wx/wx.h>
 #include <wx/filename.h>
 #include <wx/progdlg.h>
+#include "OneDriveUploader.h"
+
 
 
 enum RequestType {
@@ -39,8 +41,24 @@ public:
 
 	void SetData(wxString data);
 
+	//void setResumableXferFunction(OneDriveUploader* uploader);
+
 	int GetResponseCode() {
 		return responseCode;
 	}
+
+	//Assertion error miatt
+	void SetToLargeUpload() {
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
+	}
+
+	void SetData(wxFile& file, size_t nCount, int offset) {
+		file.Seek(offset, wxFromStart);
+		uploadData = new char[nCount];
+		auto readBytes = file.Read(uploadData, nCount);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, uploadData);
+		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, readBytes);
+	}
+
 };
 

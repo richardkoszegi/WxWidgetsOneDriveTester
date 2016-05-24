@@ -1,7 +1,6 @@
 #include "MyCurl.h"
 
 
-
 MyCurl::MyCurl()
 {
 	curl = curl_easy_init();
@@ -43,7 +42,9 @@ void MyCurl::SetRequestType(RequestType type) {
 	case HTTP_PUT:
 		code = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 		break;
-	//TODO: DELETE
+	case HTTP_DELETE:
+		code = curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "DELETE");
+		break;
 	}
 	if (code != CURLE_OK)
 		throw "Failed to set HTTPGet";
@@ -128,4 +129,14 @@ void MyCurl::SetData(wxString data) {
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, data.Len());
 }
 
+static int resumableProgressCallback(void *clientptr, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
+	OneDriveUploader* uploader = (OneDriveUploader *)clientptr;
+	uploader->SetProgressBar(ulnow);
+	return 0;
+}
 
+//void MyCurl::setResumableXferFunction(OneDriveUploader* uploader) {
+//	curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0);
+//	curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, resumableProgressCallback);
+//	curl_easy_setopt(curl, CURLOPT_XFERINFODATA, uploader);
+//}

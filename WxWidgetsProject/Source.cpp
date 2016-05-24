@@ -43,6 +43,7 @@ EVT_MENU(ID_UploadFile, MyFrame::UploadFile)
 EVT_MENU(ID_CreateFolder, MyFrame::CreateFolder)
 wxEND_EVENT_TABLE()
 wxIMPLEMENT_APP(MyApp);
+
 bool MyApp::OnInit()
 {
 	MyFrame *frame = new MyFrame("One Drive Test", wxPoint(50, 50), wxSize(600, 600));

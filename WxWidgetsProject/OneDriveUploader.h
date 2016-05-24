@@ -16,10 +16,15 @@ private:
 	wxString uploadFilePath;
 	OneDriveHandler* handler;
 	wxString uploadUrl;
+
+	wxProgressDialog* progressDialog;
 public:
 	OneDriveUploader(wxString filePath, OneDriveHandler* odh);
 	~OneDriveUploader();
 	void CreateUploadSession();
 	void UploadFragments();
+	void CancelUpload();
+
+	void SetProgressBar(curl_off_t ulnow);
 };
 
