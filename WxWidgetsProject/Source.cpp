@@ -24,6 +24,7 @@ private:
 	void OnLogin(wxCommandEvent& event);
 	void UploadFile(wxCommandEvent& event);
 	void CreateFolder(wxCommandEvent& event);
+	void ListFolder(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 };
 
@@ -31,7 +32,8 @@ private:
 enum {
 	ID_Login = 1,
 	ID_UploadFile = 2,
-	ID_CreateFolder = 3
+	ID_CreateFolder = 3,
+	ID_ListFolder = 4
 };
 
 
@@ -41,6 +43,7 @@ EVT_MENU(wxID_ABOUT, MyFrame::OnAbout)
 EVT_MENU(ID_Login, MyFrame::OnLogin)
 EVT_MENU(ID_UploadFile, MyFrame::UploadFile)
 EVT_MENU(ID_CreateFolder, MyFrame::CreateFolder)
+EVT_MENU(ID_ListFolder, MyFrame::ListFolder)
 wxEND_EVENT_TABLE()
 wxIMPLEMENT_APP(MyApp);
 
@@ -60,6 +63,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuFile->Append(ID_Login, "&OneDriveLogin", "Login to OneDrive");
 	menuFile->Append(ID_UploadFile, "&UploadFile", "Upload File");
 	menuFile->Append(ID_CreateFolder, "&CreateFolder", "Create Folder");
+	menuFile->Append(ID_ListFolder, "&ListFolder", "List Folder");
 	menuFile->Append(wxID_EXIT);
 
 	wxMenu *menuHelp = new wxMenu;
@@ -118,4 +122,8 @@ void MyFrame::UploadFile(wxCommandEvent& event) {
 	OpenDialog->Destroy();
 
 	this->SetStatusText("File uploaded!");
+}
+
+void MyFrame::ListFolder(wxCommandEvent& event) {
+	odh->ListFolder();
 }

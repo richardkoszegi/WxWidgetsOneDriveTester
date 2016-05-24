@@ -269,3 +269,27 @@ void OneDriveHandler::UploadFile(wxString filePath) {
 		UploadSmallFile(filePath);
 }
 
+void OneDriveHandler::ListFolder() {
+	MyCurl curl;
+	wxString authHeader = wxString("Authorization: bearer ") + this->GetAccessToken();
+	curl.AddHeader(const_cast<char *>(authHeader.mb_str().data()));
+	curl.SetRequestType(HTTP_GET);
+	//curl.SetUrl("https://api.onedrive.com/v1.0/drive/special/approot:/Egyetem:/children");
+	curl.SetUrl("https://api.onedrive.com/v1.0/drive/special/approot/children");
+	curl.DoIt();
+
+	Document d;
+	if (d.ParseInsitu(curl.GetResponse()).HasParseError()) {
+		wxLogDebug("Error!");
+	}
+
+	Value& valuev = d["value"];
+	for (SizeType i = 0; i < d["value"].Size(); i++) {
+		wxString item = wxString("name: ") + d["value"][i]["name"].GetString();
+		if (d["value"][i].HasMember("folder"))
+			item += wxString(" (folder)");
+		wxLogDebug(item);
+	}
+	wxMessageBox(curl.GetResponse(), "Listing Done!", wxOK | wxICON_INFORMATION);
+}
+

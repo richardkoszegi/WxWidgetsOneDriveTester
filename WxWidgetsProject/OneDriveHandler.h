@@ -28,6 +28,8 @@ public:
 	void UploadLargeFile(wxString filePath);
 
 	bool IsLoggedIn();
+
+	void ListFolder();
 private:
 	wxString rootDirId;
 
