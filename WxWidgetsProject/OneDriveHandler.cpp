@@ -19,6 +19,9 @@
 //UploadLargeFile
 #include "OneDriveUploader.h"
 
+//HeaderTokenizer in download
+#include <wx/tokenzr.h>
+
 using namespace rapidjson;
 //using namespace Provider;
 OneDriveHandler::OneDriveHandler()
@@ -291,5 +294,110 @@ void OneDriveHandler::ListFolder() {
 		wxLogDebug(item);
 	}
 	wxMessageBox(curl.GetResponse(), "Listing Done!", wxOK | wxICON_INFORMATION);
+}
+
+int GetFileSize(wxString header) {
+	wxStringTokenizer tkz(header, wxT("\n"));
+	int fileSize;
+	while (tkz.HasMoreTokens()) {
+		wxString token = tkz.GetNextToken();
+		if (token.StartsWith("Content-Range")) {
+			wxString fileSizeStr = token.SubString(token.Find("/") + 1, token.Length());
+			wxLogDebug(fileSizeStr);
+			fileSize = std::stoi(fileSizeStr.c_str().AsChar());
+			break;
+		}
+	}
+	return fileSize;
+}
+
+int packetSize = 1048576;
+
+void DownloadLargeFile(wxFile& file, wxString& url, int fileSize, wxProgressDialog* progressDialog) {
+	//int packetSize = 1048576;
+	//int downloadedSize = 1048576;
+	int downloadedSize = packetSize;
+	int packetNr = 1 + ((fileSize - 1) / packetSize);
+	wxLogDebug(wxString("Packet nr:") + wxString(std::to_string(packetNr)));
+	for (int currentPacketNr = 1; currentPacketNr < packetNr; currentPacketNr++) {
+		wxLogDebug(std::to_string(currentPacketNr + 1) + wxString(". package"));
+		MyCurl curl;
+		curl.SetUrl(const_cast<char *>(url.mb_str().data()));
+		//curl.SetHeaderData();
+		//curl.AddHeader("Accept-Charset: utf-16");
+		int currentSize;
+		if (fileSize - downloadedSize < packetSize) {
+			std::string range = "Range: bytes=" + std::to_string(currentPacketNr * packetSize) + "-" + std::to_string(fileSize - 1);
+			curl.AddHeader(const_cast<char*>(range.c_str()));
+			currentSize = fileSize - downloadedSize;
+		}
+		else {
+			std::string range = "Range: bytes=" + std::to_string(currentPacketNr * packetSize) + "-" + std::to_string(((currentPacketNr + 1) * packetSize) - 1);
+			curl.AddHeader(const_cast<char*>(range.c_str()));
+			currentSize = packetSize;
+		}
+
+		curl.DoIt();
+		file.Seek(downloadedSize, wxFromStart);
+		wxString filedata(curl.GetResponse());
+		file.Write(filedata, wxConvUTF8);
+		downloadedSize += currentSize;
+		progressDialog->Update(downloadedSize);
+		wxLogDebug(wxString("RespCode: ") + wxString(std::to_string(curl.GetResponseCode())));
+		wxLogDebug(wxString("Curr dwsize:") + wxString(std::to_string(downloadedSize)));
+	}
+	wxLogDebug(wxString(std::to_string(downloadedSize)) + "_" + wxString(std::to_string(fileSize)));
+}
+
+void OneDriveHandler::DownloadFile() {
+	wxString filename("nhf.pdf");
+	//wxString filename("MagicLetterTest.txt");
+	MyCurl curl;
+	wxString authHeader = wxString("Authorization: bearer ") + this->GetAccessToken();
+	curl.AddHeader(const_cast<char *>(authHeader.mb_str().data()));
+	curl.SetRequestType(HTTP_GET);
+	wxString url = wxString("https://api.onedrive.com/v1.0/drive/special/approot:/") + filename + wxString(":/content");
+	curl.SetUrl(const_cast<char *>(url.mb_str().data()));
+	curl.SetHeaderData();
+	curl.DoIt();
+
+	wxString r(curl.GetResponseHeader());
+	wxString downloadUrl = r.SubString(r.Find("https://"), r.Find(filename.c_str()) + (filename.size() - 1));
+
+	MyCurl curl2;
+	//curl2.AddHeader("Range: bytes=0-1048575");//1024*1024-1
+	wxString rangeHeader = wxString("Range: bytes=0-") + wxString(std::to_string(packetSize-1));
+	curl2.AddHeader(const_cast<char*>(rangeHeader.mb_str().data()));//1024*1024-1
+	curl2.SetUrl(const_cast<char *>(downloadUrl.mb_str().data()));
+	curl2.SetHeaderData();
+	curl2.DoIt();
+	if (curl2.GetResponseCode() == 200) {
+		wxLogDebug("Small Download");
+		wxFile file;
+		file.Create(filename, true);
+		wxString filedata(curl2.GetResponse());
+		file.Write(filedata);
+		file.Close();
+	}
+	else
+		if (curl2.GetResponseCode() == 206) {
+			wxLogDebug("Large Download");
+			wxLogDebug(curl2.GetResponseHeader().c_str());
+			wxString header(curl2.GetResponseHeader());
+			int fileSize = GetFileSize(header);
+			wxFile file;
+			file.Create(filename, true);
+			wxString filedata(curl2.GetResponse());
+			file.Seek(0);
+			file.Write(filedata, wxConvUTF8);
+			wxProgressDialog* progressDialog = new wxProgressDialog("Upload progress", "Your upload in progress:",fileSize);
+			progressDialog->ShowModal();
+			DownloadLargeFile(file, downloadUrl, fileSize, progressDialog);
+			file.Close();
+			delete progressDialog;
+		}
+	//wxLogDebug(curl.GetResponseHeader());
+	wxLogDebug(std::to_string(curl.GetResponseCode()).c_str());
+	wxMessageBox("Downloaded!", "DownLoad Done!", wxOK | wxICON_INFORMATION);
 }
 

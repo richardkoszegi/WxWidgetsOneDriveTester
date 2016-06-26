@@ -25,6 +25,7 @@ private:
 	void UploadFile(wxCommandEvent& event);
 	void CreateFolder(wxCommandEvent& event);
 	void ListFolder(wxCommandEvent& event);
+	void DownloadFile(wxCommandEvent& event);
 	wxDECLARE_EVENT_TABLE();
 };
 
@@ -33,7 +34,8 @@ enum {
 	ID_Login = 1,
 	ID_UploadFile = 2,
 	ID_CreateFolder = 3,
-	ID_ListFolder = 4
+	ID_ListFolder = 4,
+	ID_DownloadFile = 5
 };
 
 
@@ -44,6 +46,7 @@ EVT_MENU(ID_Login, MyFrame::OnLogin)
 EVT_MENU(ID_UploadFile, MyFrame::UploadFile)
 EVT_MENU(ID_CreateFolder, MyFrame::CreateFolder)
 EVT_MENU(ID_ListFolder, MyFrame::ListFolder)
+EVT_MENU(ID_DownloadFile, MyFrame::DownloadFile)
 wxEND_EVENT_TABLE()
 wxIMPLEMENT_APP(MyApp);
 
@@ -64,6 +67,7 @@ MyFrame::MyFrame(const wxString& title, const wxPoint& pos, const wxSize& size)
 	menuFile->Append(ID_UploadFile, "&UploadFile", "Upload File");
 	menuFile->Append(ID_CreateFolder, "&CreateFolder", "Create Folder");
 	menuFile->Append(ID_ListFolder, "&ListFolder", "List Folder");
+	menuFile->Append(ID_DownloadFile, "&DownloadFile", "Download File");
 	menuFile->Append(wxID_EXIT);
 
 	wxMenu *menuHelp = new wxMenu;
@@ -126,4 +130,8 @@ void MyFrame::UploadFile(wxCommandEvent& event) {
 
 void MyFrame::ListFolder(wxCommandEvent& event) {
 	odh->ListFolder();
+}
+
+void MyFrame::DownloadFile(wxCommandEvent& event) {
+	odh->DownloadFile();
 }

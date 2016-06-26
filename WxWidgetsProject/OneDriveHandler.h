@@ -11,7 +11,7 @@ public:
 
 	bool Login();
 	void UploadFile(wxString filePath);
-	void Download();
+	void DownloadFile();
 
 	static size_t OneDrive_refresh_token_rx_handler(char *d, size_t n, size_t l, Network::Request* self);
 

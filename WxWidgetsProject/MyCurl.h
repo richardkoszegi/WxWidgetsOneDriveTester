@@ -26,6 +26,8 @@ private:
 	std::string response;
 	char* uploadData;
 	int responseCode;
+
+	std::string responseHeader;
 public:
 	MyCurl();
 	~MyCurl();
@@ -58,6 +60,14 @@ public:
 		auto readBytes = file.Read(uploadData, nCount);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDS, uploadData);
 		curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, readBytes);
+	}
+
+	void SetHeaderData() {
+		curl_easy_setopt(curl, CURLOPT_HEADERDATA, &responseHeader);
+	}
+
+	std::string GetResponseHeader() {
+		return responseHeader;
 	}
 
 };
