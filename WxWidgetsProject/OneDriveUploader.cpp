@@ -44,7 +44,7 @@ void OneDriveUploader::CreateUploadSession() {
 	}
 
 	rapidjson::Document d;
-	d.ParseInsitu(curl.GetResponse());
+	d.ParseInsitu(const_cast<char*>(curl.GetResponse().c_str()));
 
 	rapidjson::Value& uploadUrlValue = d["uploadUrl"];
 	uploadUrl = uploadUrlValue.GetString();

@@ -36,7 +36,7 @@ public:
 	void DoIt();
 	void SetRequestType(RequestType);
 	void SetUrl(char* url);
-	char* GetResponse();
+	std::string& GetResponse();
 	void setXferFunction(wxProgressDialog* progressDialog);
 
 	void SetToSmallFile(wxString filePath);

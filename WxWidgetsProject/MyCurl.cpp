@@ -94,8 +94,8 @@ void MyCurl::DoIt() {
 			curl_easy_strerror(code));
 }
 
-char* MyCurl::GetResponse() {
-	return const_cast<char *>(response.c_str());
+std::string& MyCurl::GetResponse() {
+	return response;
 }
 
 static int progressCallback(void *clientptr, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
